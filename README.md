@@ -75,10 +75,13 @@ query {
 Create new patient using mutation
 ```
 mutation {
-  createPatient(name: "Kailo Ben", email: "kailo.ben@gmail.com") {
+  createPatient(name: "Kailo Ben", email: "kailo.ben@gmail.com", address: "123 Sesame St", city: "Los Angeles", postal_code: "10001") {
     id
     name
     email
+    address
+    city
+    postal_code
   }
 }
 ```
@@ -86,7 +89,7 @@ mutation {
 Update an patient using mutation
 ```
 mutation {
-  updatePatient(id: 2, name: "Sohel Amin Shah", email: "kailo.ben.1@gmail.com") {
+  updatePatient(id: 2, name: "Iam Sofa King Cool", email: "kailo.ben.1@gmail.com") {
     id
     name
     email
