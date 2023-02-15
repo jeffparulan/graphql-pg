@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS patient
     id serial PRIMARY KEY,
     name varchar(100) NOT NULL,
     email varchar(150) NOT NULL,
+    address varchar(50),
+    city varchar(25),
+    postal_code varchar (12),
     created_at date
 );
 

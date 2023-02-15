@@ -19,15 +19,18 @@ const (
 	DB_HOST     = "localhost"
 	DB_PORT     = "5432"
 	DB_USER     = "postgres"
-	DB_PASSWORD = "xxx"
+	DB_PASSWORD = "postgres123"
 	DB_NAME     = "postgres"
 )
 
 type Patient struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at`
+	ID         int       `json:"id"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Address    string    `json:"address"`
+	City       string    `json:"city"`
+	PostalCode string    `json:"postal_code"`
+	CreatedAt  time.Time `json:"created_at`
 }
 
 type Post struct {
@@ -100,6 +103,36 @@ func main() {
 						return Patient.Email, nil
 					}
 
+					return nil, nil
+				},
+			},
+			"address": &graphql.Field{
+				Type:        graphql.NewNonNull(graphql.String),
+				Description: "The address of the Patient.",
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					if Patient, ok := p.Source.(*Patient); ok {
+						return Patient.Address, nil
+					}
+					return nil, nil
+				},
+			},
+			"city": &graphql.Field{
+				Type:        graphql.NewNonNull(graphql.String),
+				Description: "The city of the Patient.",
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					if Patient, ok := p.Source.(*Patient); ok {
+						return Patient.City, nil
+					}
+					return nil, nil
+				},
+			},
+			"postal_code": &graphql.Field{
+				Type:        graphql.NewNonNull(graphql.String),
+				Description: "The postal code of the Patient.",
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					if Patient, ok := p.Source.(*Patient); ok {
+						return Patient.PostalCode, nil
+					}
 					return nil, nil
 				},
 			},
@@ -207,14 +240,14 @@ func main() {
 				Type:        graphql.NewList(PatientType),
 				Description: "List of Patients.",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					rows, err := db.Query("SELECT id, name, email FROM patient")
+					rows, err := db.Query("SELECT id, name, email, address, city, postal_code, created_at FROM patient")
 					checkErr(err)
 					var Patients []*Patient
 
 					for rows.Next() {
 						Patient := &Patient{}
 
-						err = rows.Scan(&Patient.ID, &Patient.Name, &Patient.Email)
+						err = rows.Scan(&Patient.ID, &Patient.Name, &Patient.Email, &Patient.Address, &Patient.City, &Patient.PostalCode, &Patient.CreatedAt)
 						checkErr(err)
 						Patients = append(Patients, Patient)
 					}
@@ -276,21 +309,36 @@ func main() {
 					"email": &graphql.ArgumentConfig{
 						Type: graphql.NewNonNull(graphql.String),
 					},
+					"address": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"city": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"postal_code": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					name, _ := params.Args["name"].(string)
 					email, _ := params.Args["email"].(string)
+					address, _ := params.Args["address"].(string)
+					city, _ := params.Args["city"].(string)
+					postal_code, _ := params.Args["postal_code"].(string)
 					createdAt := time.Now()
 
 					var lastInsertId int
-					err = db.QueryRow("INSERT INTO patient(name, email, created_at) VALUES($1, $2, $3) returning id;", name, email, createdAt).Scan(&lastInsertId)
+					err = db.QueryRow("INSERT INTO patient(name, email, address, city, postal_code, created_at) VALUES($1, $2, $3, $4, $5, $6) returning id;", name, email, address, city, postal_code, createdAt).Scan(&lastInsertId)
 					checkErr(err)
 
 					newPatient := &Patient{
-						ID:        lastInsertId,
-						Name:      name,
-						Email:     email,
-						CreatedAt: createdAt,
+						ID:         lastInsertId,
+						Name:       name,
+						Email:      email,
+						Address:    address,
+						City:       city,
+						PostalCode: postal_code,
+						CreatedAt:  createdAt,
 					}
 
 					return newPatient, nil
