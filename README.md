@@ -89,7 +89,7 @@ mutation {
 Update an patient using mutation
 ```
 mutation {
-  updatePatient(id: 2, name: "Iam Sofa King Cool", email: "kailo.ben.1@gmail.com") {
+  updatePatient(id: 2, name: "Kailo Ben", email: "kailo.ben.1@gmail.com") {
     id
     name
     email
